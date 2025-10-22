@@ -3,7 +3,8 @@ package vg.edu.pe.HinoPE.model.enums;
 public enum UserRole {
     ADMIN("admin"),
     ASESOR("asesor"),
-    DRIVER("driver");
+    MECANICO("mecanico"),
+    SUPERVISOR("supervisor");
 
     private final String value;
 

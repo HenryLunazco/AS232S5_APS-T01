@@ -92,7 +92,8 @@ El sistema maneja tres roles principales:
 |-----|-------------|----------|
 | `admin` | Administrador del sistema | Acceso completo a todos los recursos |
 | `asesor` | Asesor de ventas | Gestión de cotizaciones y clientes |
-| `driver` | Conductor | Acceso limitado a información de vehículos |
+| `mecanico` | Mecánico del taller | Mantenimiento y gestión de vehículos |
+| `supervisor` | Supervisor de operaciones | Control y supervisión de procesos |
 
 ### Control de Acceso
 
@@ -114,27 +115,27 @@ Actualmente, el sistema valida que el usuario esté autenticado pero **no implem
 
 ## Gestión de Contraseñas
 
-### ⚠️ Estado Actual (TEMPORAL)
+### ✅ Estado Actual
 
-**Las contraseñas actualmente NO están encriptadas**. Se almacenan y comparan en texto plano.
+**Las contraseñas están encriptadas con BCrypt**. Se hashean al crear/actualizar usuarios y se verifican durante el login.
 
-#### Implementación Temporal
+#### Implementación Actual
 
 **AuthService.java**:
 ```java
-// Comparación directa sin hash
-boolean matches = password.equals(user.getPasswordHash());
+// Verificación con BCrypt
+boolean matches = PasswordUtil.verifyPassword(password, user.getPasswordHash());
 ```
 
 **UserService.java**:
 ```java
-// No se hashea la contraseña al crear/actualizar usuarios
-// Código de hasheo comentado temporalmente
+// Hasheo de contraseña al crear/actualizar usuarios
+if (user.getPasswordHash() != null && !user.getPasswordHash().isEmpty()) {
+    user.setPasswordHash(PasswordUtil.hashPassword(user.getPasswordHash()));
+}
 ```
 
-### Implementación de BCrypt (Preparada)
-
-El sistema tiene preparada la infraestructura para usar BCrypt:
+### Implementación de BCrypt
 
 #### PasswordUtil
 - **Ubicación**: `src/main/java/vg/edu/pe/HinoPE/util/PasswordUtil.java`
@@ -143,27 +144,27 @@ El sistema tiene preparada la infraestructura para usar BCrypt:
   - `hashPassword(String plainPassword)`: Hashea una contraseña
   - `verifyPassword(String plainPassword, String hashedPassword)`: Verifica una contraseña
 
-#### Activar Encriptación
+#### Características de Seguridad
 
-Para activar el hasheo de contraseñas:
+- **Algoritmo**: BCrypt con factor de trabajo 10
+- **Salt**: Generado automáticamente por BCrypt
+- **Hash**: 60 caracteres en formato `$2a$10$...`
+- **Resistente a**: Rainbow tables, fuerza bruta
+- **Verificación**: Tiempo constante para prevenir timing attacks
 
-1. **En AuthService.java**, cambiar:
-```java
-// De:
-boolean matches = password.equals(user.getPasswordHash());
+#### Migración de Contraseñas
 
-// A:
-boolean matches = PasswordUtil.verifyPassword(password, user.getPasswordHash());
+Si tienes contraseñas en texto plano en la base de datos, puedes usar este script SQL:
+
+```sql
+-- Habilitar extensión pgcrypto
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- Encriptar contraseñas existentes
+UPDATE users 
+SET password_hash = crypt(password_hash, gen_salt('bf'))
+WHERE password_hash NOT LIKE '$2%';
 ```
-
-2. **En UserService.java**, descomentar:
-```java
-if (user.getPasswordHash() != null && !user.getPasswordHash().isEmpty()) {
-    user.setPasswordHash(PasswordUtil.hashPassword(user.getPasswordHash()));
-}
-```
-
-3. **Migrar contraseñas existentes** en la base de datos a formato BCrypt
 
 ---
 
@@ -335,17 +336,19 @@ POST   /api/upload              # Subir archivo
 4. **Validación de Entrada**: Uso de `@Valid` en controllers
 5. **Logging de Seguridad**: Registro de intentos de autenticación
 6. **Separación de Responsabilidades**: Filtros, servicios y configuración separados
+7. **Encriptación BCrypt**: Contraseñas hasheadas con factor 10
+8. **Verificación Segura**: Comparación de contraseñas con timing constante
 
 ### Recomendaciones Pendientes ⚠️
 
-1. **Activar BCrypt**: Implementar hasheo de contraseñas
-2. **RBAC**: Control de acceso basado en roles
-3. **Rate Limiting**: Limitar intentos de login
-4. **Refresh Tokens**: Implementar tokens de refresco
-5. **Token Blacklist**: Lista negra para tokens revocados
-6. **Auditoría**: Registro de acciones de seguridad
-7. **2FA**: Autenticación de dos factores (opcional)
-8. **Password Policy**: Políticas de contraseñas fuertes
+1. **RBAC**: Control de acceso basado en roles a nivel de endpoint
+2. **Rate Limiting**: Limitar intentos de login (prevenir fuerza bruta)
+3. **Refresh Tokens**: Implementar tokens de refresco
+4. **Token Blacklist**: Lista negra para tokens revocados
+5. **Auditoría**: Registro de acciones de seguridad críticas
+6. **2FA**: Autenticación de dos factores (opcional)
+7. **Password Policy**: Políticas de contraseñas fuertes (longitud, complejidad)
+8. **Account Lockout**: Bloqueo tras intentos fallidos
 
 ---
 
@@ -359,26 +362,28 @@ POST   /api/upload              # Subir archivo
 - [x] Endpoints públicos y protegidos
 - [x] Extracción de información del usuario desde token
 - [x] Manejo de errores de autenticación
-- [x] Documentación Swagger sin autenticación
-- [x] Infraestructura BCrypt preparada
+- [x] Documentación Swagger con autenticación JWT
+- [x] Encriptación BCrypt de contraseñas
+- [x] Hasheo automático al crear/actualizar usuarios
+- [x] Verificación segura de contraseñas en login
 
-### ⚠️ Temporal
+### ⚠️ Pendiente
 
-- [ ] Contraseñas en texto plano (DEBE CAMBIARSE)
-- [ ] Sin control de acceso por roles
+- [ ] Control de acceso basado en roles (RBAC) a nivel de endpoint
+- [ ] Políticas de contraseñas fuertes (longitud mínima, complejidad)
 
 ### 🔜 Por Implementar
 
-- [ ] Activar encriptación BCrypt
-- [ ] Control de acceso basado en roles (RBAC)
-- [ ] Refresh tokens
-- [ ] Rate limiting en login
+- [ ] Control de acceso basado en roles (RBAC) a nivel de endpoint
+- [ ] Refresh tokens para renovación de sesión
+- [ ] Rate limiting en login (prevenir fuerza bruta)
 - [ ] Token blacklist/revocación
-- [ ] Auditoría de seguridad
-- [ ] Políticas de contraseñas
-- [ ] Recuperación de contraseña
-- [ ] Cambio de contraseña
+- [ ] Auditoría de seguridad (log de acciones críticas)
+- [ ] Políticas de contraseñas (longitud mínima, complejidad)
+- [ ] Recuperación de contraseña por email
+- [ ] Cambio de contraseña para usuarios
 - [ ] Bloqueo de cuenta tras intentos fallidos
+- [ ] Autenticación de dos factores (2FA)
 
 ---
 

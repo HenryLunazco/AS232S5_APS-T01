@@ -8,12 +8,37 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ## [Unreleased]
 
 ### Por Implementar
-- Encriptación BCrypt de contraseñas
-- Control de acceso basado en roles (RBAC)
+- Control de acceso basado en roles (RBAC) a nivel de endpoint
 - Sistema de refresh tokens
 - Rate limiting en endpoints de autenticación
 - Recuperación de contraseña por email
+- Cambio de contraseña para usuarios
 - Auditoría de acciones de seguridad
+- Bloqueo de cuenta tras intentos fallidos
+
+---
+
+## [0.2.0] - 2025-10-21
+
+### Añadido
+- Encriptación BCrypt de contraseñas activada en UserService y AuthService
+- Verificación de contraseñas con BCrypt en proceso de login
+- Hasheo automático de contraseñas al crear y actualizar usuarios
+
+### Cambiado
+- Roles de usuario actualizados: `admin`, `asesor`, `mecanico`, `supervisor`
+- Eliminado rol `driver`, añadidos roles `mecanico` y `supervisor`
+- Estadísticas de usuarios actualizadas para reflejar nuevos roles
+- UserRole enum sincronizado con schema de base de datos
+
+### Corregido
+- Advertencias de anotaciones @NonNull en R2dbcConfig y JwtAuthenticationFilter
+- Sincronización entre roles de Java y ENUMs de PostgreSQL
+
+### Seguridad
+- ✅ Contraseñas ahora se almacenan hasheadas con BCrypt (factor 10)
+- ✅ Validación de contraseñas usando BCrypt en autenticación
+- ✅ PasswordUtil implementado y en uso
 
 ---
 
@@ -48,7 +73,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - Controlador `UserController` con endpoints REST
 - Endpoint de estadísticas de usuarios
 - Validación de email único
-- Roles de usuario: admin, asesor, driver
+- Roles de usuario: admin, asesor, mecanico, supervisor
 
 #### Módulo de Vehículos
 - CRUD completo de vehículos
@@ -137,16 +162,15 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - Logging de parámetros SQL
 - Logging de eventos de seguridad
 
-### Temporal
+### Pendiente
 
-#### ⚠️ Configuración de Desarrollo
-- Contraseñas almacenadas en texto plano (sin BCrypt)
-- Comparación directa de contraseñas en login
+#### ⚠️ Para Producción
 - Sin control de acceso basado en roles a nivel de endpoint
 - Todos los usuarios autenticados tienen acceso a todos los recursos
+- Sin rate limiting en endpoints de autenticación
+- Sin sistema de refresh tokens
 
-> **Nota**: Esta configuración es temporal para facilitar el desarrollo inicial.
-> Debe activarse BCrypt y RBAC antes de producción.
+> **Nota**: Estas funcionalidades deben implementarse antes de producción.
 
 ---
 

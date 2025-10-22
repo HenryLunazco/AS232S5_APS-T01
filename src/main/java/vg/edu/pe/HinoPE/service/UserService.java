@@ -7,7 +7,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import vg.edu.pe.HinoPE.model.entity.User;
 import vg.edu.pe.HinoPE.repository.UserRepository;
-/*import vg.edu.pe.HinoPE.util.PasswordUtil;*/
+import vg.edu.pe.HinoPE.util.PasswordUtil;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -58,10 +58,10 @@ public class UserService {
                     return Mono.error(new IllegalArgumentException("El email ya está registrado"));
                 })
                 .switchIfEmpty(Mono.defer(() -> {
-                    // TEMPORAL: No hashear contraseña, guardar en texto plano
-                    // if (user.getPasswordHash() != null && !user.getPasswordHash().isEmpty()) {
-                    //     user.setPasswordHash(PasswordUtil.hashPassword(user.getPasswordHash()));
-                    // }
+                    // Encriptar contraseña con BCrypt
+                    if (user.getPasswordHash() != null && !user.getPasswordHash().isEmpty()) {
+                        user.setPasswordHash(PasswordUtil.hashPassword(user.getPasswordHash()));
+                    }
                     
                     // Set default values
                     if (user.getFechaIngreso() == null) {
@@ -113,9 +113,9 @@ public class UserService {
         if (user.getFechaIngreso() != null) existingUser.setFechaIngreso(user.getFechaIngreso());
         if (user.getAvatarUrl() != null) existingUser.setAvatarUrl(user.getAvatarUrl());
         
-        // TEMPORAL: No hashear contraseña, guardar en texto plano
+        // Encriptar contraseña con BCrypt si se proporciona
         if (user.getPasswordHash() != null && !user.getPasswordHash().isEmpty()) {
-            existingUser.setPasswordHash(user.getPasswordHash());
+            existingUser.setPasswordHash(PasswordUtil.hashPassword(user.getPasswordHash()));
         }
         
         existingUser.setUpdatedAt(LocalDateTime.now());
@@ -148,8 +148,11 @@ public class UserService {
                     long asesores = users.stream()
                             .filter(u -> "asesor".equals(u.getRol()))
                             .count();
-                    long drivers = users.stream()
-                            .filter(u -> "driver".equals(u.getRol()))
+                    long mecanicos = users.stream()
+                            .filter(u -> "mecanico".equals(u.getRol()))
+                            .count();
+                    long supervisores = users.stream()
+                            .filter(u -> "supervisor".equals(u.getRol()))
                             .count();
                     long activos = users.stream()
                             .filter(u -> "activo".equals(u.getEstado()))
@@ -164,7 +167,8 @@ public class UserService {
                     stats.put("total", total);
                     stats.put("admins", admins);
                     stats.put("asesores", asesores);
-                    stats.put("drivers", drivers);
+                    stats.put("mecanicos", mecanicos);
+                    stats.put("supervisores", supervisores);
                     stats.put("activos", activos);
                     stats.put("inactivos", inactivos);
                     stats.put("ventasTotales", ventasTotales);

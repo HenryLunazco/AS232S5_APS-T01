@@ -6,7 +6,7 @@ CREATE TYPE vehicle_type AS ENUM ('camion', 'bus');
 CREATE TYPE vehicle_status AS ENUM ('disponible', 'reservado', 'vendido');
 CREATE TYPE quote_status AS ENUM ('pendiente', 'en-proceso', 'enviada', 'cerrada');
 CREATE TYPE quote_priority AS ENUM ('alta', 'media', 'baja');
-CREATE TYPE user_role AS ENUM ('admin', 'asesor', 'driver');
+CREATE TYPE user_role AS ENUM ('asesor', 'admin', 'mecanico', 'supervisor');
 CREATE TYPE user_status AS ENUM ('activo', 'inactivo');
 CREATE TYPE notification_type AS ENUM ('alert', 'maintenance', 'fuel', 'system', 'quote', 'user', 'vehicle', 'sale');
 CREATE TYPE notification_priority AS ENUM ('alta', 'media', 'baja');
@@ -117,13 +117,16 @@ INSERT INTO vehicles (modelo, tipo, categoria, precio, capacidad, motor, año, e
 ('HINO AK Bus Urbano', 'bus', 'Urbano', 95000.00, '40 - 50 pasajeros', '7.7L Diesel', 2025, 'disponible', 6, '/hino-urban-bus-white.jpg'),
 ('HINO FC Bus Interurbano', 'bus', 'Interurbano', 135000.00, '45 - 55 pasajeros', '8.9L Diesel', 2025, 'reservado', 3, '/hino-intercity-bus-red.jpg');
 
+-- Habilitar la extensión (una sola vez por base de datos)
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Sample data for users
 INSERT INTO users (nombre, email, telefono, rol, especialidad, estado, ventas, fecha_ingreso, password_hash) VALUES
-('Carlos Mendoza', 'carlos.mendoza@hino.com.pe', '+51 999 888 777', 'asesor', 'Camiones Pesados', 'activo', 150, '2020-03-15', 'hashed_password_1'),
-('María González', 'maria.gonzalez@hino.com.pe', '+51 999 777 666', 'asesor', 'Buses Urbanos', 'activo', 120, '2021-06-20', 'hashed_password_2'),
-('Roberto Silva', 'roberto.silva@hino.com.pe', '+51 999 666 555', 'asesor', 'Camiones Ligeros', 'activo', 95, '2022-01-10', 'hashed_password_3'),
-('Ana Torres', 'ana.torres@hino.com.pe', '+51 999 555 444', 'admin', 'Administración', 'activo', 0, '2019-08-05', 'hashed_password_4'),
-('Luis Valle', 'luis.valle@hino.com.pe', '+51 999 444 333', 'admin', 'Gerencia de Ventas', 'activo', 0, '2018-05-12', 'hashed_password_5');
+('Carlos Mendoza', 'carlos.mendoza@hino.com.pe', '+51 999 888 777', 'asesor', 'Camiones Pesados', 'activo', 150, '2020-03-15', crypt('Carlos123', gen_salt('bf'))),
+('María González', 'maria.gonzalez@hino.com.pe', '+51 999 777 666', 'asesor', 'Buses Urbanos', 'activo', 120, '2021-06-20', crypt('Maria456', gen_salt('bf'))),
+('Roberto Silva', 'roberto.silva@hino.com.pe', '+51 999 666 555', 'asesor', 'Camiones Ligeros', 'activo', 95, '2022-01-10', crypt('Roberto789', gen_salt('bf'))),
+('Ana Torres', 'ana.torres@hino.com.pe', '+51 999 555 444', 'admin', 'Administración', 'activo', 0, '2019-08-05', crypt('AnaAdmin', gen_salt('bf'))),
+('Luis Valle', 'luis.valle@hino.com.pe', '+51 999 444 333', 'admin', 'Gerencia de Ventas', 'activo', 0, '2018-05-12', crypt('LuisAdmin', gen_salt('bf')));
 
 -- Sample data for quotes
 INSERT INTO quotes (cliente_nombre, cliente_email, cliente_telefono, empresa, tipo_vehiculo, mensaje, estado, prioridad) VALUES

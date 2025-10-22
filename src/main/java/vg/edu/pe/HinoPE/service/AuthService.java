@@ -9,7 +9,7 @@ import vg.edu.pe.HinoPE.model.dto.UserDTO;
 import vg.edu.pe.HinoPE.model.entity.User;
 import vg.edu.pe.HinoPE.repository.UserRepository;
 import vg.edu.pe.HinoPE.security.JwtUtil;
-/* import vg.edu.pe.HinoPE.util.PasswordUtil;*/
+import vg.edu.pe.HinoPE.util.PasswordUtil;
 
 @Service
 @RequiredArgsConstructor
@@ -21,15 +21,14 @@ public class AuthService {
 
     /**
      * Authenticate user with email and password
-     * TEMPORAL: Acepta contraseñas en texto plano (sin encriptar)
      */
     public Mono<LoginResponse> authenticate(String email, String password) {
         log.debug("Authenticating user: {}", email);
 
         return userRepository.findByEmail(email)
                 .filter(user -> {
-                    // TEMPORAL: Comparación directa sin hash
-                    boolean matches = password.equals(user.getPasswordHash());
+                    // Verificar contraseña con BCrypt
+                    boolean matches = PasswordUtil.verifyPassword(password, user.getPasswordHash());
                     if (!matches) {
                         log.warn("Invalid password for user: {}", email);
                     }

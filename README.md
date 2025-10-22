@@ -27,7 +27,7 @@ Backend API REST para el sistema de gestión de Hino Perú. Desarrollado con Spr
 - **Lombok** (Reducción de boilerplate)
 - **JWT (jjwt 0.11.5)** (Tokens de autenticación)
 - **SpringDoc OpenAPI** (Documentación Swagger)
-- **BCrypt** (Hash de contraseñas - preparado)
+- **BCrypt** (Hash de contraseñas)
 
 ## ✨ Características
 
@@ -240,9 +240,10 @@ Authorization: Bearer <tu_token_jwt>
 
 | Rol | Descripción |
 |-----|-------------|
-| `admin` | Administrador con acceso completo |
-| `asesor` | Asesor de ventas |
-| `driver` | Conductor |
+| `admin` | Administrador con acceso completo al sistema |
+| `asesor` | Asesor de ventas, gestión de cotizaciones y clientes |
+| `mecanico` | Mecánico del taller, mantenimiento de vehículos |
+| `supervisor` | Supervisor de operaciones y control de procesos |
 
 ## 📦 Módulos
 
@@ -338,16 +339,18 @@ Authorization: Bearer <tu_token_jwt>
 - ✅ **Manejo de errores**: Respuestas estandarizadas
 - ✅ **Logging de seguridad**: Registro de intentos de autenticación
 
-### ⚠️ Estado Temporal
+### ✅ Seguridad Implementada
 
-> **Importante**: Actualmente las contraseñas se almacenan en **texto plano** para facilitar el desarrollo inicial. La infraestructura BCrypt está preparada pero deshabilitada temporalmente.
+- **Encriptación BCrypt**: Las contraseñas se almacenan hasheadas con BCrypt (factor 10)
+- **JWT Tokens**: Autenticación stateless con tokens de 24 horas
+- **Validación de entrada**: Bean Validation en todos los endpoints
+- **CORS configurado**: Listo para integración con frontend
 
-**Antes de producción**:
-- [ ] Activar encriptación BCrypt
-- [ ] Migrar contraseñas existentes
+**Pendientes para producción**:
 - [ ] Implementar control de acceso basado en roles (RBAC)
 - [ ] Añadir rate limiting en login
 - [ ] Implementar refresh tokens
+- [ ] Auditoría de acciones de seguridad
 
 Para más detalles, consulta [SECURITY.md](SECURITY.md)
 
@@ -484,14 +487,15 @@ git push origin feature/mi-nueva-feature
 
 ### Próximas Funcionalidades
 
-- [ ] Activar encriptación BCrypt de contraseñas
-- [ ] Implementar RBAC (Control de acceso basado en roles)
+- [ ] Implementar RBAC (Control de acceso basado en roles a nivel de endpoint)
 - [ ] Sistema de refresh tokens
 - [ ] Rate limiting en endpoints de autenticación
 - [ ] Recuperación de contraseña por email
+- [ ] Cambio de contraseña para usuarios
 - [ ] Websockets para notificaciones en tiempo real
 - [ ] Auditoría de acciones del sistema
 - [ ] Exportación de reportes (PDF, Excel)
+- [ ] Bloqueo de cuenta tras intentos fallidos de login
 
 ## 👥 Equipo
 
