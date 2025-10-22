@@ -1,0 +1,26 @@
+package vg.edu.pe.HinoPE.model.enums;
+
+public enum UserRole {
+    ADMIN("admin"),
+    ASESOR("asesor"),
+    DRIVER("driver");
+
+    private final String value;
+
+    UserRole(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public static UserRole fromValue(String value) {
+        for (UserRole role : UserRole.values()) {
+            if (role.value.equalsIgnoreCase(value)) {
+                return role;
+            }
+        }
+        throw new IllegalArgumentException("Invalid UserRole: " + value);
+    }
+}
