@@ -2,6 +2,21 @@
 
 Backend API REST para el sistema de gestión de Hino Perú. Desarrollado con Spring Boot WebFlux y arquitectura reactiva.
 
+## 📑 Índice
+
+- [Tecnologías](#-tecnologías)
+- [Características](#-características)
+- [Requisitos Previos](#-requisitos-previos)
+- [Configuración](#️-configuración)
+- [Ejecución](#-ejecución)
+- [Documentación de API](#-documentación-de-api)
+- [Módulos](#-módulos)
+- [Seguridad](#-seguridad)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Testing](#-testing)
+- [Documentación Adicional](#-documentación-adicional)
+- [Contribuir](#-contribuir)
+
 ## 🚀 Tecnologías
 
 - **Java 17**
@@ -10,15 +25,34 @@ Backend API REST para el sistema de gestión de Hino Perú. Desarrollado con Spr
 - **R2DBC PostgreSQL** (Acceso reactivo a base de datos)
 - **Spring Security** (Autenticación JWT)
 - **Lombok** (Reducción de boilerplate)
-- **JWT (jjwt)** (Tokens de autenticación)
-- **BCrypt** (Hash de contraseñas)
+- **JWT (jjwt 0.11.5)** (Tokens de autenticación)
+- **SpringDoc OpenAPI** (Documentación Swagger)
+- **BCrypt** (Hash de contraseñas - preparado)
+
+## ✨ Características
+
+- ✅ **Arquitectura Reactiva**: Programación no bloqueante con WebFlux
+- ✅ **Autenticación JWT**: Sistema de tokens stateless
+- ✅ **API RESTful**: Endpoints bien estructurados y documentados
+- ✅ **Documentación Swagger**: Interfaz interactiva para probar la API
+- ✅ **Validación de Datos**: Validación automática con Bean Validation
+- ✅ **Manejo de Errores**: Respuestas estandarizadas y logging
+- ✅ **CORS Configurado**: Listo para integración con frontend
+- ✅ **Carga de Archivos**: Soporte para imágenes y documentos
+- ✅ **Base de Datos Reactiva**: R2DBC para acceso no bloqueante a PostgreSQL
 
 ## 📋 Requisitos Previos
 
-- Java 17 o superior
-- Maven 3.6+
-- PostgreSQL 12+ (o cuenta en Neon)
-- Variables de entorno configuradas
+- **Java 17** o superior
+- **Maven 3.6+**
+- **PostgreSQL 12+** (o cuenta en Neon)
+- **Git** (para clonar el repositorio)
+
+### Herramientas Recomendadas
+
+- **IDE**: IntelliJ IDEA, Eclipse, o VS Code con extensiones Java
+- **Cliente API**: Postman, Insomnia, o usar Swagger UI
+- **Cliente DB**: DBeaver, pgAdmin, o TablePlus
 
 ## ⚙️ Configuración
 
@@ -62,72 +96,116 @@ LOG_LEVEL_PARAM=DEBUG
 
 ### 2. Base de Datos
 
-El proyecto está configurado para usar la base de datos existente de Neon PostgreSQL. Asegúrate de que las tablas estén creadas según el schema en `AS232S5_APS_T01-fe/database/schema.sql`.
+El proyecto está configurado para usar PostgreSQL (compatible con Neon). 
+
+**Tablas requeridas**:
+- `users` - Usuarios del sistema
+- `vehicles` - Vehículos disponibles
+- `quotes` - Cotizaciones
+- `notifications` - Notificaciones del sistema
+
+> **Nota**: Asegúrate de que las tablas estén creadas antes de ejecutar la aplicación.
 
 ## 🏃 Ejecución
 
-### Desarrollo
+### Modo Desarrollo
 
 ```bash
+# Ejecutar con Maven
 mvn spring-boot:run
+
+# O con Maven Wrapper (Windows)
+mvnw.cmd spring-boot:run
+
+# O con Maven Wrapper (Linux/Mac)
+./mvnw spring-boot:run
 ```
 
-### Producción
+### Modo Producción
 
 ```bash
+# 1. Compilar el proyecto
 mvn clean package
+
+# 2. Ejecutar el JAR
 java -jar target/HinoPE-0.0.1-SNAPSHOT.jar
 ```
 
+### Verificar que está funcionando
+
 El servidor estará disponible en `http://localhost:8080`
+
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **API Docs**: http://localhost:8080/v3/api-docs
 
 ## 📚 Documentación de API
 
-### Swagger UI
+### Swagger UI (Recomendado)
 
 La documentación interactiva de la API está disponible en:
 
-**Swagger UI:** `http://localhost:8080/swagger-ui.html`
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **OpenAPI JSON**: http://localhost:8080/v3/api-docs
 
-**OpenAPI JSON:** `http://localhost:8080/v3/api-docs`
+#### Características de Swagger UI
 
-Desde Swagger UI puedes:
-- Ver todos los endpoints disponibles
-- Probar los endpoints directamente desde el navegador
-- Ver los modelos de datos (DTOs)
-- Autenticarte con JWT para probar endpoints protegidos
+- 📖 Ver todos los endpoints disponibles
+- 🧪 Probar endpoints directamente desde el navegador
+- 📦 Ver modelos de datos (DTOs)
+- 🔐 Autenticación JWT integrada
+- 📝 Ejemplos de request/response
 
-#### Cómo usar Swagger con autenticación:
+#### Cómo usar Swagger con autenticación
 
-1. Primero, usa el endpoint `POST /api/auth/login` para obtener un token JWT
-2. Copia el token de la respuesta
-3. Haz clic en el botón "Authorize" (🔒) en la parte superior derecha
-4. Pega el token en el campo "Value" (sin el prefijo "Bearer")
-5. Haz clic en "Authorize" y luego "Close"
-6. Ahora puedes probar todos los endpoints protegidos
+1. **Login**: Usa `POST /api/auth/login` para obtener un token JWT
+   ```json
+   {
+     "email": "usuario@ejemplo.com",
+     "password": "contraseña"
+   }
+   ```
 
-### Autenticación
+2. **Copiar Token**: Copia el token de la respuesta
 
-Todos los endpoints (excepto `/api/auth/login` y `/api/public/**`) requieren autenticación JWT.
+3. **Autorizar**: 
+   - Click en el botón "Authorize" 🔒 (esquina superior derecha)
+   - Pega el token (sin el prefijo "Bearer")
+   - Click en "Authorize" y luego "Close"
+
+4. **Probar**: Ahora puedes probar todos los endpoints protegidos
+
+## 🔐 Autenticación
+
+### Endpoints Públicos (Sin autenticación)
+
+```
+POST   /api/auth/login          # Login de usuarios
+GET    /api/public/**           # Recursos públicos
+GET    /swagger-ui/**           # Documentación Swagger
+```
+
+### Endpoints Protegidos (Requieren JWT)
+
+Todos los demás endpoints bajo `/api/**` requieren autenticación JWT.
 
 **Header requerido:**
+```http
+Authorization: Bearer <tu_token_jwt>
 ```
-Authorization: Bearer <token>
-```
 
-#### POST /api/auth/login
+### Obtener Token JWT
 
-Autenticar usuario y obtener token JWT.
+**Endpoint**: `POST /api/auth/login`
 
-**Request:**
+**Request**:
 ```json
 {
-  "email": "usuario@example.com",
+  "email": "usuario@ejemplo.com",
   "password": "contraseña"
 }
 ```
 
-**Response:**
+**Response Exitosa** (200):
 ```json
 {
   "success": true,
@@ -136,157 +214,142 @@ Autenticar usuario y obtener token JWT.
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "user": {
       "id": 1,
-      "nombre": "Usuario",
-      "email": "usuario@example.com",
-      "rol": "admin"
+      "nombre": "Usuario Ejemplo",
+      "email": "usuario@ejemplo.com",
+      "rol": "admin",
+      "telefono": "+51 999 999 999",
+      "especialidad": "Ventas",
+      "estado": "activo"
     }
   },
-  "timestamp": "2025-10-15T10:30:00"
+  "timestamp": "2025-10-21T10:30:00"
 }
 ```
 
-### Vehículos
-
-#### GET /api/vehicles
-Obtener todos los vehículos (con filtros opcionales).
-
-**Query Parameters:**
-- `type` (opcional): Filtrar por tipo (camion, bus)
-- `status` (opcional): Filtrar por estado (disponible, reservado, vendido)
-
-#### GET /api/vehicles/{id}
-Obtener vehículo por ID.
-
-#### POST /api/vehicles
-Crear nuevo vehículo.
-
-#### PUT /api/vehicles/{id}
-Actualizar vehículo.
-
-#### DELETE /api/vehicles/{id}
-Eliminar vehículo.
-
-#### GET /api/vehicles/stats
-Obtener estadísticas de vehículos.
-
-### Usuarios
-
-#### GET /api/users
-Obtener todos los usuarios.
-
-#### GET /api/users/{id}
-Obtener usuario por ID.
-
-#### POST /api/users
-Crear nuevo usuario.
-
-#### PUT /api/users/{id}
-Actualizar usuario.
-
-#### DELETE /api/users/{id}
-Eliminar usuario.
-
-#### GET /api/users/stats
-Obtener estadísticas de usuarios.
-
-### Cotizaciones
-
-#### GET /api/quotes
-Obtener todas las cotizaciones (con filtros opcionales).
-
-**Query Parameters:**
-- `status` (opcional): Filtrar por estado
-- `priority` (opcional): Filtrar por prioridad
-
-#### GET /api/quotes/{id}
-Obtener cotización por ID.
-
-#### POST /api/quotes
-Crear nueva cotización.
-
-#### PUT /api/quotes/{id}
-Actualizar cotización.
-
-#### PUT /api/quotes/{id}/assign
-Asignar asesor a cotización.
-
-**Query Parameters:**
-- `advisorId`: ID del asesor a asignar
-
-#### DELETE /api/quotes/{id}
-Eliminar cotización.
-
-#### GET /api/quotes/stats
-Obtener estadísticas de cotizaciones.
-
-### Notificaciones
-
-#### GET /api/notifications
-Obtener todas las notificaciones (con filtros opcionales).
-
-**Query Parameters:**
-- `read` (opcional): Filtrar por estado de lectura (true/false)
-- `type` (opcional): Filtrar por tipo
-
-#### GET /api/notifications/{id}
-Obtener notificación por ID.
-
-#### POST /api/notifications
-Crear nueva notificación.
-
-#### PUT /api/notifications/{id}/read
-Marcar notificación como leída.
-
-#### PUT /api/notifications/read-all
-Marcar todas las notificaciones como leídas.
-
-#### DELETE /api/notifications/{id}
-Eliminar notificación.
-
-#### GET /api/notifications/stats
-Obtener estadísticas de notificaciones.
-
-### Carga de Archivos
-
-#### POST /api/upload
-Subir archivo (imagen o documento).
-
-**Form Data:**
-- `file`: Archivo a subir
-- `type` (opcional): Tipo de archivo (image, document) - default: image
-
-**Response:**
+**Response Error** (401):
 ```json
 {
-  "success": true,
-  "message": "Archivo subido exitosamente",
-  "data": {
-    "url": "/uploads/images/uuid.jpg",
-    "filename": "original-filename.jpg"
-  }
+  "success": false,
+  "message": "Credenciales incorrectas",
+  "data": null,
+  "timestamp": "2025-10-21T10:30:00"
 }
 ```
 
-### Endpoints Públicos (Sin Autenticación)
+### Roles de Usuario
 
-#### GET /api/public/vehicles
-Obtener vehículos disponibles.
+| Rol | Descripción |
+|-----|-------------|
+| `admin` | Administrador con acceso completo |
+| `asesor` | Asesor de ventas |
+| `driver` | Conductor |
 
-**Query Parameters:**
-- `type` (opcional): Filtrar por tipo
+## 📦 Módulos
 
-#### GET /api/public/vehicles/{id}
-Obtener vehículo por ID.
+### 👤 Usuarios
 
-#### GET /api/public/advisors
-Obtener lista de asesores activos.
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/users` | Listar todos los usuarios |
+| GET | `/api/users/{id}` | Obtener usuario por ID |
+| POST | `/api/users` | Crear nuevo usuario |
+| PUT | `/api/users/{id}` | Actualizar usuario |
+| DELETE | `/api/users/{id}` | Eliminar usuario |
+| GET | `/api/users/stats` | Estadísticas de usuarios |
+
+### 🚛 Vehículos
+
+| Método | Endpoint | Descripción | Query Params |
+|--------|----------|-------------|--------------|
+| GET | `/api/vehicles` | Listar vehículos | `type`, `status` |
+| GET | `/api/vehicles/{id}` | Obtener vehículo | - |
+| POST | `/api/vehicles` | Crear vehículo | - |
+| PUT | `/api/vehicles/{id}` | Actualizar vehículo | - |
+| DELETE | `/api/vehicles/{id}` | Eliminar vehículo | - |
+| GET | `/api/vehicles/stats` | Estadísticas | - |
+
+**Filtros disponibles**:
+- `type`: `camion`, `bus`
+- `status`: `disponible`, `reservado`, `vendido`
+
+### 📋 Cotizaciones
+
+| Método | Endpoint | Descripción | Query Params |
+|--------|----------|-------------|--------------|
+| GET | `/api/quotes` | Listar cotizaciones | `status`, `priority` |
+| GET | `/api/quotes/{id}` | Obtener cotización | - |
+| POST | `/api/quotes` | Crear cotización | - |
+| PUT | `/api/quotes/{id}` | Actualizar cotización | - |
+| PUT | `/api/quotes/{id}/assign` | Asignar asesor | `advisorId` |
+| DELETE | `/api/quotes/{id}` | Eliminar cotización | - |
+| GET | `/api/quotes/stats` | Estadísticas | - |
+
+**Estados**: `pendiente`, `en_proceso`, `aprobada`, `rechazada`  
+**Prioridades**: `baja`, `media`, `alta`, `urgente`
+
+### 🔔 Notificaciones
+
+| Método | Endpoint | Descripción | Query Params |
+|--------|----------|-------------|--------------|
+| GET | `/api/notifications` | Listar notificaciones | `read`, `type` |
+| GET | `/api/notifications/{id}` | Obtener notificación | - |
+| POST | `/api/notifications` | Crear notificación | - |
+| PUT | `/api/notifications/{id}/read` | Marcar como leída | - |
+| PUT | `/api/notifications/read-all` | Marcar todas leídas | - |
+| DELETE | `/api/notifications/{id}` | Eliminar notificación | - |
+| GET | `/api/notifications/stats` | Estadísticas | - |
+
+**Tipos**: `info`, `warning`, `error`, `success`
+
+### 📁 Carga de Archivos
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/api/upload` | Subir archivo (imagen o documento) |
+
+**Form Data**:
+- `file`: Archivo a subir
+- `type`: `image` o `document` (opcional, default: `image`)
+
+**Límites**:
+- Imágenes: 10 MB
+- Documentos: 20 MB
+
+**Formatos permitidos**:
+- Imágenes: JPG, JPEG, PNG, GIF, WEBP
+- Documentos: PDF, DOC, DOCX, XLS, XLSX
+
+### 🌐 Endpoints Públicos
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/public/vehicles` | Vehículos disponibles |
+| GET | `/api/public/vehicles/{id}` | Detalle de vehículo |
+| GET | `/api/public/advisors` | Lista de asesores activos |
 
 ## 🔒 Seguridad
 
-- **JWT**: Tokens con expiración de 24 horas
-- **BCrypt**: Hash de contraseñas con strength 10
-- **CORS**: Configurado para permitir requests desde el frontend
-- **Validación**: Validación de datos en todos los endpoints
+### Implementado
+
+- ✅ **JWT (JSON Web Tokens)**: Autenticación stateless
+- ✅ **Tokens con expiración**: 24 horas por defecto (configurable)
+- ✅ **CORS**: Configurado para permitir requests desde frontend
+- ✅ **Validación de datos**: Bean Validation en todos los endpoints
+- ✅ **Manejo de errores**: Respuestas estandarizadas
+- ✅ **Logging de seguridad**: Registro de intentos de autenticación
+
+### ⚠️ Estado Temporal
+
+> **Importante**: Actualmente las contraseñas se almacenan en **texto plano** para facilitar el desarrollo inicial. La infraestructura BCrypt está preparada pero deshabilitada temporalmente.
+
+**Antes de producción**:
+- [ ] Activar encriptación BCrypt
+- [ ] Migrar contraseñas existentes
+- [ ] Implementar control de acceso basado en roles (RBAC)
+- [ ] Añadir rate limiting en login
+- [ ] Implementar refresh tokens
+
+Para más detalles, consulta [SECURITY.md](SECURITY.md)
 
 ## 📁 Estructura del Proyecto
 
@@ -313,47 +376,134 @@ HinoPE/
 
 ## 🐛 Manejo de Errores
 
-Todas las respuestas de error siguen el formato:
+### Formato de Respuesta Estandarizado
 
+**Respuesta Exitosa**:
+```json
+{
+  "success": true,
+  "message": "Operación exitosa",
+  "data": { /* datos */ },
+  "timestamp": "2025-10-21T10:30:00"
+}
+```
+
+**Respuesta de Error**:
 ```json
 {
   "success": false,
   "message": "Descripción del error",
   "data": null,
-  "timestamp": "2025-10-15T10:30:00"
+  "timestamp": "2025-10-21T10:30:00"
 }
 ```
 
-**Códigos de estado HTTP:**
-- `200 OK`: Operación exitosa
-- `201 Created`: Recurso creado exitosamente
-- `204 No Content`: Recurso eliminado exitosamente
-- `400 Bad Request`: Error de validación
-- `401 Unauthorized`: No autenticado o token inválido
-- `404 Not Found`: Recurso no encontrado
-- `500 Internal Server Error`: Error interno del servidor
+### Códigos de Estado HTTP
+
+| Código | Descripción |
+|--------|-------------|
+| 200 | Operación exitosa |
+| 201 | Recurso creado exitosamente |
+| 204 | Recurso eliminado exitosamente |
+| 400 | Error de validación |
+| 401 | No autenticado o token inválido |
+| 404 | Recurso no encontrado |
+| 500 | Error interno del servidor |
+
+### Excepciones Personalizadas
+
+- `ResourceNotFoundException`: Recurso no encontrado (404)
+- `ValidationException`: Error de validación (400)
+- `UnauthorizedException`: No autorizado (401)
 
 ## 🧪 Testing
 
+### Ejecutar Tests
+
 ```bash
-# Ejecutar tests
+# Todos los tests
 mvn test
 
-# Ejecutar tests con cobertura
+# Tests específicos
+mvn test -Dtest=UserServiceTest
+
+# Con cobertura (JaCoCo)
 mvn test jacoco:report
+
+# Ver reporte de cobertura
+# Abre: target/site/jacoco/index.html
 ```
 
-## 📝 Notas
+### Tipos de Tests
 
-- El proyecto usa programación reactiva con Mono/Flux
-- Todas las operaciones de base de datos son no bloqueantes
-- Los passwords nunca se retornan en las respuestas de la API
-- Los archivos subidos se almacenan en `public/uploads/`
+- **Unit Tests**: Tests de servicios y utilidades
+- **Integration Tests**: Tests de controladores y repositorios
+- **Reactive Tests**: Usando `StepVerifier` de Project Reactor
 
-## 👥 Autores
+## 📖 Documentación Adicional
 
-Proyecto desarrollado para Hino Perú
+- **[SECURITY.md](SECURITY.md)**: Documentación completa de seguridad
+- **[CONTRIBUTING.md](CONTRIBUTING.md)**: Guía para contribuir al proyecto
+- **[CHANGELOG.md](CHANGELOG.md)**: Historial de cambios y versiones
+
+## 🤝 Contribuir
+
+¿Quieres contribuir al proyecto? Lee nuestra [Guía de Contribución](CONTRIBUTING.md) para conocer:
+
+- Cómo configurar el entorno de desarrollo
+- Estándares de código y convenciones
+- Proceso de Pull Requests
+- Cómo reportar bugs
+
+### Quick Start para Contribuir
+
+```bash
+# 1. Fork el repositorio
+# 2. Clonar tu fork
+git clone https://github.com/tu-usuario/hinope-backend.git
+
+# 3. Crear branch de feature
+git checkout -b feature/mi-nueva-feature
+
+# 4. Hacer cambios y commit
+git commit -m "feat: añadir nueva funcionalidad"
+
+# 5. Push y crear Pull Request
+git push origin feature/mi-nueva-feature
+```
+
+## 📝 Notas Importantes
+
+- 🔄 **Programación Reactiva**: El proyecto usa Mono/Flux (Project Reactor)
+- 🚫 **No Bloqueante**: Todas las operaciones de BD son asíncronas
+- 🔐 **Seguridad**: Los passwords nunca se retornan en las respuestas
+- 📁 **Archivos**: Se almacenan en `public/uploads/`
+- 📊 **Logging**: Configurado con SLF4J y Logback
+
+## 🚀 Roadmap
+
+### Próximas Funcionalidades
+
+- [ ] Activar encriptación BCrypt de contraseñas
+- [ ] Implementar RBAC (Control de acceso basado en roles)
+- [ ] Sistema de refresh tokens
+- [ ] Rate limiting en endpoints de autenticación
+- [ ] Recuperación de contraseña por email
+- [ ] Websockets para notificaciones en tiempo real
+- [ ] Auditoría de acciones del sistema
+- [ ] Exportación de reportes (PDF, Excel)
+
+## 👥 Equipo
+
+Proyecto desarrollado para **Hino Perú**
 
 ## 📄 Licencia
 
 Este proyecto es privado y confidencial.
+
+---
+
+**Versión**: 0.1.0  
+**Última actualización**: Octubre 2025
+
+Para más información, consulta la [documentación completa](CONTRIBUTING.md) o contacta al equipo de desarrollo.
